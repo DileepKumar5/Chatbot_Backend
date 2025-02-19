@@ -18,8 +18,5 @@ langchain-pinecone
 langchain-text-splitters
 langchain-core
 openai
-pytorch
 pandas
 python-pptx
-google-auth-oauthlib
-googleapiclient
