@@ -6,7 +6,7 @@ import fitz  # PyMuPDF
 import docx
 import pandas as pd
 from pptx import Presentation
-from langchain.embeddings import OpenAIEmbeddings
+from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_pinecone import Pinecone as PineconeVectorStore  # ✅ Fixed Import
 from langchain.text_splitter import RecursiveCharacterTextSplitter  # ✅ More efficient splitter
 import hashlib  # ✅ Added to create unique chunk IDs
