@@ -18,3 +18,4 @@ langchain
 langchain-community
 langchain-pinecone
 openai
+langchain-openai
