@@ -169,4 +169,7 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+<<<<<<< HEAD
 service_account.json
+=======
+>>>>>>> ba7a6d45386697792439e84824e392a1bc2b2397
