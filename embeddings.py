@@ -25,16 +25,16 @@ pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 index_name = os.getenv("PINECONE_INDEX_NAME")
 
 # Check if Pinecone index exists, if not create it
+# Check if Pinecone index exists, if not create it
 if index_name not in pc.list_indexes().names():
     logger.info(f"🛠 Creating Pinecone index: {index_name}")
-    spec = {
-        "dimension": 3072,  # Matches OpenAI embeddings
-        "metric": "cosine"  # Use cosine similarity metric
-    }
+    # Use both 'name' and 'dimension' as positional arguments
     pc.create_index(
         name=index_name,
-        spec=spec
+        dimension=3072,  # Matches OpenAI embeddings
+        metric="cosine"  # Use cosine similarity metric
     )
+
 
 # Connect to Pinecone Index
 index = pc.Index(index_name)
