@@ -6,6 +6,8 @@ import io
 import logging
 from dotenv import load_dotenv
 from embeddings import process_and_store_embeddings, document_exists_in_pinecone
+import base64
+
 
 # Load environment variables
 load_dotenv()
@@ -24,7 +26,6 @@ logger = logging.getLogger(__name__)
 # Authenticate with Google Drive
 try:
     # creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    # Load the JSON data and authenticate
     creds = service_account.Credentials.from_service_account_info(
         json.loads(service_account_data), scopes=SCOPES
     )
