@@ -12,7 +12,9 @@ load_dotenv()
 
 # Load Google Drive API credentials
 SCOPES = ["https://www.googleapis.com/auth/drive"]
-SERVICE_ACCOUNT_FILE = os.getenv("SERVICE_ACCOUNT_FILE", "service_account.json")
+# SERVICE_ACCOUNT_FILE = os.getenv("SERVICE_ACCOUNT_FILE", "service_account.json")
+service_account_data = base64.b64decode(os.getenv("GOOGLE_SERVICE_ACCOUNT")).decode("utf-8")
+
 FOLDER_ID = os.getenv("GOOGLE_DRIVE_FOLDER_ID")
 
 # Initialize Logging
@@ -21,7 +23,11 @@ logger = logging.getLogger(__name__)
 
 # Authenticate with Google Drive
 try:
-    creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    # creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
+    # Load the JSON data and authenticate
+    creds = service_account.Credentials.from_service_account_info(
+        json.loads(service_account_data), scopes=SCOPES
+    )
     drive_service = build("drive", "v3", credentials=creds)
     logger.info("✅ Successfully connected to Google Drive API")
 except Exception as e:
