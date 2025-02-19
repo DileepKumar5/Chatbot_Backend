@@ -27,11 +27,14 @@ index_name = os.getenv("PINECONE_INDEX_NAME")
 # Check if Pinecone index exists, if not create it
 if index_name not in pc.list_indexes().names():
     logger.info(f"🛠 Creating Pinecone index: {index_name}")
-    pc.create_index(
-        name=index_name,
-        dimension=1536,  # ✅ Matches OpenAI embeddings
-        metric="cosine"
-    )
+    # Set up the Pinecone index spec
+    spec = {
+        "name": index_name,
+        "dimension": 3072,  # ✅ Matches OpenAI embeddings
+        "metric": "cosine",
+        "replicas": 1  # Add more replicas as needed
+    }
+    pc.create_index(spec=spec)
 
 # Connect to Pinecone Index
 index = pc.Index(index_name)
@@ -43,6 +46,9 @@ embedding_model = OpenAIEmbeddings(model=os.getenv("OPENAI_EMBEDDING_MODEL"))
 vector_store = PineconeVectorStore(index=index, embedding=embedding_model, namespace="default")
 
 logger.info("✅ Pinecone & OpenAI Embeddings Initialized Successfully!")
+
+# Your remaining functions...
+
 
 
 def extract_text(file_path: str) -> str:
