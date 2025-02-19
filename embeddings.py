@@ -27,10 +27,13 @@ index_name = os.getenv("PINECONE_INDEX_NAME")
 # Check if Pinecone index exists, if not create it
 if index_name not in pc.list_indexes().names():
     logger.info(f"🛠 Creating Pinecone index: {index_name}")
+    spec = {
+        "dimension": 3072,  # Matches OpenAI embeddings
+        "metric": "cosine"  # Use cosine similarity metric
+    }
     pc.create_index(
         name=index_name,
-        dimension=3072,  # ✅ Matches OpenAI embeddings
-        metric="cosine"
+        spec=spec
     )
 
 # Connect to Pinecone Index
@@ -43,7 +46,6 @@ embedding_model = OpenAIEmbeddings(model=os.getenv("OPENAI_EMBEDDING_MODEL"))
 vector_store = PineconeVectorStore(index=index, embedding=embedding_model, namespace="default")
 
 logger.info("✅ Pinecone & OpenAI Embeddings Initialized Successfully!")
-
 
 def extract_text(file_path: str) -> str:
     """Extracts text from different file types with proper formatting."""
@@ -83,10 +85,10 @@ def extract_text(file_path: str) -> str:
 def document_exists_in_pinecone(filename: str) -> bool:
     """Properly checks if embeddings for a file exist in Pinecone using metadata filtering."""
     try:
-        # ✅ Query Pinecone for metadata matching the filename
+        # Query Pinecone for metadata matching the filename
         response = index.query(vector=[], filter={"source": filename}, top_k=1, include_metadata=True)
 
-        # ✅ If matches are found, embeddings exist
+        # If matches are found, embeddings exist
         if response and response.get("matches"):
             logger.info(f"🔍 File '{filename}' already exists in Pinecone. Skipping processing.")
             return True  # File embeddings exist
@@ -99,8 +101,6 @@ def document_exists_in_pinecone(filename: str) -> bool:
         return False  # Assume it doesn't exist to avoid skipping new files
 
 
-
-
 def generate_chunk_id(filename: str, chunk_text: str) -> str:
     """Generates a unique hash ID for each chunk based on filename and chunk text."""
     return hashlib.sha256(f"{filename}-{chunk_text}".encode()).hexdigest()
@@ -111,7 +111,7 @@ def process_and_store_embeddings(file_path: str, filename: str) -> int:
     Processes document, extracts text, and stores embeddings only if not already stored.
     Uses RecursiveCharacterTextSplitter for better chunking.
     """
-    # ✅ Check if embeddings for the specific file already exist
+    # Check if embeddings for the specific file already exist
     if document_exists_in_pinecone(filename):
         logger.info(f"⏭️ Skipping {filename}, embeddings already exist in Pinecone")
         return 0  # Skip processing
@@ -122,7 +122,7 @@ def process_and_store_embeddings(file_path: str, filename: str) -> int:
         logger.warning(f"⚠️ Skipping {filename} due to empty content")
         return 0  # Return 0 to indicate no chunks were stored
 
-    # ✅ Improved text splitting
+    # Improved text splitting
     text_splitter = RecursiveCharacterTextSplitter(
         chunk_size=1000, chunk_overlap=150, separators=["\n\n", "\n", " ", ""]
     )
@@ -131,7 +131,7 @@ def process_and_store_embeddings(file_path: str, filename: str) -> int:
     chunk_ids = [generate_chunk_id(filename, chunk) for chunk in chunks]
     metadata = [{"source": filename, "chunk_id": chunk_id, "chunk": i} for i, chunk_id in enumerate(chunk_ids)]
 
-    # ✅ Store embeddings in Pinecone with unique IDs
+    # Store embeddings in Pinecone with unique IDs
     vector_store.add_texts(chunks, metadatas=metadata, ids=chunk_ids)
     logger.info(f"✅ Stored {len(chunks)} chunks for {filename} in Pinecone")
 
