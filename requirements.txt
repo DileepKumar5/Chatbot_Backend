@@ -17,3 +17,4 @@ python-pptx
 langchain
 langchain-community
 langchain-pinecone
+openai
