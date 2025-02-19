@@ -7,6 +7,7 @@ import logging
 from dotenv import load_dotenv
 from embeddings import process_and_store_embeddings, document_exists_in_pinecone
 import base64
+import json
 
 
 # Load environment variables
