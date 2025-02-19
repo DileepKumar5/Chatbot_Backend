@@ -14,7 +14,7 @@ PyMuPDF
 python-docx
 langchain
 langchain-openai
-langchain-pinecone
+langchain-pinecone==0.2.2
 langchain-text-splitters
 langchain-core
 openai
