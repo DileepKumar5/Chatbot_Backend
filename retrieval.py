@@ -87,9 +87,14 @@ def retrieve_answer_and_reference(query: str):
     Dynamically retrieves and structures both the chatbot's answer and the reference answer from stored PDFs.
     """
 
-    # Step 1: Handle casual greetings
-    greetings = ["hi", "hello", "hey", "howdy", "greetings", "good morning", "good evening"]
-    if any(greeting in query.lower() for greeting in greetings):
+    # Normalize the query to lowercase and strip unwanted spaces
+    normalized_query = query.strip().lower()
+
+    # Step 1: Handle casual greetings more generally (relaxed)
+    greetings = ["hi", "hello", "hey", "howdy", "greetings", "good morning", "good evening", "what's up", "yo"]
+    
+    # Check if any of the greeting words are found in the query (case-insensitive)
+    if any(greeting in normalized_query for greeting in greetings):
         return "Hello! How can I assist you today? Feel free to ask any specific questions."
 
     try:
@@ -120,4 +125,3 @@ def retrieve_answer_and_reference(query: str):
 
     except Exception as e:
         return f"Error retrieving reference: {str(e)}", f"Error retrieving chatbot answer: {str(e)}"
-
