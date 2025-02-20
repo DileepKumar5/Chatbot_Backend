@@ -87,30 +87,32 @@ def retrieve_answer_and_reference(query: str):
     Dynamically retrieves and structures both the chatbot's answer and the reference answer from stored PDFs.
     """
 
-    # Check if query is a simple greeting or casual input
-    if query.lower() in ["hi", "hello", "hey", "howdy", "greetings"]:
-        return "Hello! How can I assist you today?"
+    # Step 1: Handle casual greetings
+    greetings = ["hi", "hello", "hey", "howdy", "greetings", "good morning", "good evening"]
+    if any(greeting in query.lower() for greeting in greetings):
+        return "Hello! How can I assist you today? Feel free to ask any specific questions."
 
     try:
         retriever = vector_store.as_retriever()
 
-        # ✅ Retrieve top 5 documents based on query relevance
+        # Step 2: If it's not a greeting, retrieve relevant documents
         retrieved_docs = retriever.invoke(query)
 
         if not retrieved_docs:
             return "No relevant reference found.", "The system couldn't find a matching answer. Please try rephrasing your question."
 
-        # ✅ Extract the most relevant passage dynamically based on the query
+        # Step 3: Improve matching of relevant documents
         best_match = ""
-        for doc in retrieved_docs[:5]:  # ✅ Scan top 5 results
+        for doc in retrieved_docs[:5]:  # Look at top 5 results
+            # We improve matching by ensuring the query's keywords appear in the document's content
             if any(word.lower() in doc.page_content.lower() for word in query.split()):
                 best_match = doc.page_content
                 break
 
-        # ✅ If no good match found, use the highest-ranked document
+        # If no match is found, select the top document
         reference_answer = best_match if best_match else retrieved_docs[0].page_content
 
-        # ✅ Clean and humanize the retrieved reference content
+        # Step 4: Clean and format the response for clarity
         refined_response = clean_and_humanize(reference_answer)
 
         return reference_answer, refined_response
