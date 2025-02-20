@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import logging
 from google_drive import fetch_and_process_drive_files
 from retrieval import retrieve_answer_and_reference  # ✅ Correct Import
-from evaluation import evaluate_response_with_rag  # ✅ Evaluates chatbot answer vs reference
+# from evaluation import evaluate_response_with_rag  # ✅ Evaluates chatbot answer vs reference
 from pydantic import BaseModel
 
 # Load environment variables
