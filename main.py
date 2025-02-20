@@ -58,22 +58,22 @@ async def query_chatbot(query_request: QueryRequest):
         logger.error(f"Error retrieving answer: {e}")
         raise HTTPException(status_code=500, detail="Failed to retrieve response")
 
-@app.post("/evaluate-rag/")
-async def evaluate_rag_response(evaluation_request: EvaluationRequest):
-    """Evaluates chatbot response from RAG system using NLP metrics."""
-    try:
-        query = evaluation_request.query
+# @app.post("/evaluate-rag/")
+# async def evaluate_rag_response(evaluation_request: EvaluationRequest):
+#     """Evaluates chatbot response from RAG system using NLP metrics."""
+#     try:
+#         query = evaluation_request.query
 
-        # ✅ Fetch the reference answer automatically and evaluate
-        evaluation_scores = evaluate_response_with_rag(query)
+#         # ✅ Fetch the reference answer automatically and evaluate
+#         evaluation_scores = evaluate_response_with_rag(query)
 
-        return evaluation_scores
-    except asyncio.CancelledError:
-        logger.warning("Request was cancelled.")
-        raise HTTPException(status_code=499, detail="Request was cancelled by client.")
-    except Exception as e:
-        logger.error(f"Error in evaluation: {e}")
-        raise HTTPException(status_code=500, detail="Failed to evaluate response")
+#         return evaluation_scores
+#     except asyncio.CancelledError:
+#         logger.warning("Request was cancelled.")
+#         raise HTTPException(status_code=499, detail="Request was cancelled by client.")
+#     except Exception as e:
+#         logger.error(f"Error in evaluation: {e}")
+#         raise HTTPException(status_code=500, detail="Failed to evaluate response")
 
 if __name__ == "__main__":
     import uvicorn
