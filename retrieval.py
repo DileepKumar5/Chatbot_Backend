@@ -41,25 +41,17 @@ def clean_and_humanize(text: str) -> str:
     if not text:
         return "No content available to process."
 
-    # ✅ Remove all Markdown symbols
+    # Remove Markdown symbols, tables, and other unnecessary characters
     text = re.sub(r"\*\*|\_\_", "", text)  # Remove bold/italic markers
     text = re.sub(r"\*+", "", text)  # Remove any remaining asterisks
-
-    # ✅ Remove headers (e.g., ### Summary)
-    text = re.sub(r"^#+\s*", "", text)  # Remove leading "###"
-
-    # ✅ Remove table formatting (e.g., `| Header | Data |`)
-    text = re.sub(r"\|", " ", text)  # Replace pipe (`|`) characters
-
-    # ✅ Remove unnecessary brackets and extra spaces
+    text = re.sub(r"^#+\s*", "", text)  # Remove headers like "### Summary"
+    text = re.sub(r"\|", " ", text)  # Replace pipe (`|`) characters from tables
     text = re.sub(r"[\[\]\n]", " ", text)  # Remove square brackets and newlines
     text = re.sub(r"\s+", " ", text).strip()  # Normalize spaces
     text = re.sub(r"\([^)]+\)", "", text)  # Remove unnecessary parentheses
+    text = re.sub(r"[:\-]+$", "", text).strip()  # Remove trailing punctuation
 
-    # ✅ Remove trailing punctuation (avoids "Summary:" issue)
-    text = re.sub(r"[:\-]+$", "", text).strip()
-
-    # ✅ Improved prompt to GPT for **clean and human-friendly** responses
+    # Clean up based on AI response
     prompt = f"""
     Convert the following extracted text into a clean, readable response:
     - Remove unnecessary formatting, symbols, and markdown.
@@ -73,8 +65,8 @@ def clean_and_humanize(text: str) -> str:
         ai_response = llm.invoke(prompt)  # Get AIMessage object
         final_output = ai_response.content.strip()
 
-        # ✅ Final Cleanup on GPT Output
-        final_output = re.sub(r"\*\*|\_\_", "", final_output)  # Remove any missed bold text
+        # Final Cleanup on GPT Output
+        final_output = re.sub(r"\*\*|\_\_", "", final_output)  # Clean any missed formatting
         final_output = re.sub(r"\|", " ", final_output)  # Remove pipes if GPT used them
         final_output = re.sub(r"\s+", " ", final_output).strip()  # Normalize spaces
 
@@ -89,37 +81,39 @@ def retrieve_answer_and_reference(query: str):
     try:
         retriever = vector_store.as_retriever()
 
-        # Step 1: Retrieve relevant documents based on the query
+        # Retrieve relevant documents based on the query
         retrieved_docs = retriever.invoke(query)
 
         if not retrieved_docs:
             return "No relevant reference found.", "The system couldn't find a matching answer. Please try rephrasing your question."
 
-        # Step 2: Improve matching of relevant documents
+        # Process the best match from the retrieved documents
         best_match = ""
         for doc in retrieved_docs[:5]:  # Look at top 5 results
-            # We improve matching by ensuring the query's keywords appear in the document's content
             if any(word.lower() in doc.page_content.lower() for word in query.split()):
                 best_match = doc.page_content
                 break
 
-        # If no match is found, select the top document
         reference_answer = best_match if best_match else retrieved_docs[0].page_content
 
-        # Step 3: Clean and format the response for clarity
+        # Clean and format the reference content
         refined_response = clean_and_humanize(reference_answer)
 
-        # Step 4: Use GPT to handle the response naturally (including greeting handling)
+        # GPT to handle the response naturally based on the context
         prompt = f"""
-        Please respond to the following user query as naturally and helpfully as possible:
+        Based on the following content, please respond to the user's query as naturally and helpfully as possible:
+
+        **Content:**
+        "{refined_response}"
+
+        **User Query:**
         "{query}"
         """
 
-        ai_response = llm.invoke(prompt)  # Let GPT handle everything including greetings
+        ai_response = llm.invoke(prompt)  # Let GPT formulate the response
 
-        # Step 5: Return both the refined answer and the response from GPT
-        return reference_answer, ai_response.content.strip()
+        # Return only the GPT response
+        return refined_response, ai_response.content.strip()
 
     except Exception as e:
         return f"Error retrieving reference: {str(e)}", f"Error retrieving chatbot answer: {str(e)}"
-
