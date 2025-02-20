@@ -86,6 +86,11 @@ def retrieve_answer_and_reference(query: str):
     """
     Dynamically retrieves and structures both the chatbot's answer and the reference answer from stored PDFs.
     """
+
+    # Check if query is a simple greeting or casual input
+    if query.lower() in ["hi", "hello", "hey", "howdy", "greetings"]:
+        return "Hello! How can I assist you today?"
+
     try:
         retriever = vector_store.as_retriever()
 
