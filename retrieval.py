@@ -115,7 +115,9 @@ def retrieve_answer_and_reference(query: str):
         # Step 4: Clean and format the response for clarity
         refined_response = clean_and_humanize(reference_answer)
 
+        # Ensure only two values are returned: reference_answer and refined_response
         return reference_answer, refined_response
 
     except Exception as e:
         return f"Error retrieving reference: {str(e)}", f"Error retrieving chatbot answer: {str(e)}"
+
