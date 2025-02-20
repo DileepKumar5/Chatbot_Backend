@@ -86,27 +86,16 @@ def retrieve_answer_and_reference(query: str):
     """
     Dynamically retrieves and structures both the chatbot's answer and the reference answer from stored PDFs.
     """
-
-    # Normalize the query to lowercase and strip unwanted spaces
-    normalized_query = query.strip().lower()
-
-    # Step 1: Handle casual greetings more generally (relaxed)
-    greetings = ["hi", "hello", "hey", "howdy", "greetings", "good morning", "good evening", "what's up", "yo"]
-    
-    # Check if any of the greeting words are found in the query (case-insensitive)
-    if any(greeting in normalized_query for greeting in greetings):
-        return "Hello! How can I assist you today? Feel free to ask any specific questions."
-
     try:
         retriever = vector_store.as_retriever()
 
-        # Step 2: If it's not a greeting, retrieve relevant documents
+        # Step 1: Retrieve relevant documents based on the query
         retrieved_docs = retriever.invoke(query)
 
         if not retrieved_docs:
             return "No relevant reference found.", "The system couldn't find a matching answer. Please try rephrasing your question."
 
-        # Step 3: Improve matching of relevant documents
+        # Step 2: Improve matching of relevant documents
         best_match = ""
         for doc in retrieved_docs[:5]:  # Look at top 5 results
             # We improve matching by ensuring the query's keywords appear in the document's content
@@ -117,11 +106,20 @@ def retrieve_answer_and_reference(query: str):
         # If no match is found, select the top document
         reference_answer = best_match if best_match else retrieved_docs[0].page_content
 
-        # Step 4: Clean and format the response for clarity
+        # Step 3: Clean and format the response for clarity
         refined_response = clean_and_humanize(reference_answer)
 
-        # Ensure only two values are returned: reference_answer and refined_response
-        return reference_answer, refined_response
+        # Step 4: Use GPT to handle the response naturally (including greeting handling)
+        prompt = f"""
+        Please respond to the following user query as naturally and helpfully as possible:
+        "{query}"
+        """
+
+        ai_response = llm.invoke(prompt)  # Let GPT handle everything including greetings
+
+        # Step 5: Return both the refined answer and the response from GPT
+        return reference_answer, ai_response.content.strip()
 
     except Exception as e:
         return f"Error retrieving reference: {str(e)}", f"Error retrieving chatbot answer: {str(e)}"
+
