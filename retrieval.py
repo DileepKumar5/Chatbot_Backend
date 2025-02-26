@@ -23,9 +23,9 @@ os.environ["LANGSMITH_PROJECT"] = langsmith_project
 llm = ChatOpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
     model=os.getenv("OPENAI_MODEL"),
-    temperature=0.7,  # ✅ Set at initialization
+    temperature=0.7,
     top_p=0.95,
-    max_tokens=512  # ✅ Use `max_tokens` instead of `top_k`
+    max_tokens=512
 )
 
 # ✅ Get Pinecone Vector Store
@@ -33,7 +33,7 @@ vector_store = get_vector_store()
 
 
 def clean_text(text: str) -> str:
-    """Cleans text by removing markdown symbols, special characters, and unnecessary formatting."""
+    """Cleans text and ensures list formatting with new lines."""
     if not text:
         return "No content available."
 
@@ -46,7 +46,10 @@ def clean_text(text: str) -> str:
     text = re.sub(r"[:\-]+$", "", text)  # Remove trailing colons and dashes
     text = re.sub(r"\s+", " ", text).strip()  # Normalize spaces
 
-    return text
+    # ✅ Ensure each list item is on a **new line** (Fixing improper inline formatting)
+    text = re.sub(r"(\d+)\.\s", r"\n\1. ", text)  # Force new line before numbered items
+
+    return text.strip()
 
 
 def clean_and_humanize(text: str) -> str:
@@ -56,6 +59,7 @@ def clean_and_humanize(text: str) -> str:
     prompt = f"""
     Convert the following extracted text into a clean, readable response:
     - Remove unnecessary formatting, symbols, and markdown.
+    - Ensure list items appear **on separate lines**.
     - Structure the response naturally.
 
     **Extracted Text:**
@@ -63,7 +67,7 @@ def clean_and_humanize(text: str) -> str:
     """
 
     try:
-        ai_response = llm.predict(prompt)  # ✅ FIXED: Use `.predict()` instead of `.invoke()`
+        ai_response = llm.predict(prompt)
         return clean_text(ai_response.strip())  # ✅ Ensuring clean output
 
     except Exception as e:
@@ -73,8 +77,8 @@ def clean_and_humanize(text: str) -> str:
 def retrieve_answer_and_reference(query: str):
     """Retrieves the best response by first showing context, then generating an answer."""
     try:
-        retriever = vector_store.as_retriever(search_kwargs={"k": 5})  # ✅ Retrieve top 5 results
-        retrieved_docs = retriever.get_relevant_documents(query)  # ✅ FIXED: Use `.get_relevant_documents(query)`
+        retriever = vector_store.as_retriever(search_kwargs={"k": 5})
+        retrieved_docs = retriever.get_relevant_documents(query)
 
         if not retrieved_docs:
             return {
@@ -96,12 +100,12 @@ def retrieve_answer_and_reference(query: str):
 
         **Instructions:**
         - Answer the question accurately using the provided context.
+        - Ensure list items are presented **on new lines** for clarity.
         - If uncertain, state that the information is unavailable.
-        - Avoid assumptions or fabricated responses.
         """
 
-        ai_response = llm.predict(prompt)  # ✅ FIXED: Removed `top_k`
-        final_response = clean_text(ai_response.strip())  # ✅ Ensure clean output
+        ai_response = llm.predict(prompt)
+        final_response = clean_text(ai_response.strip())
 
         return {
             "retrieved_context": formatted_context,
