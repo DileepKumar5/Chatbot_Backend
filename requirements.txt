@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # ✅ FastAPI & Server
 fastapi
 uvicorn
@@ -10,13 +11,24 @@ python-dotenv
 asyncio
 
 # ✅ Google API (For Google Drive Integration)
+=======
+fastapi
+uvicorn
+gunicorn
+pydantic
+requests
+python-dotenv
+>>>>>>> heroku/main
 google-api-python-client
 google-auth
 google-auth-httplib2
 google-auth-oauthlib
 googleapis-common-protos
+<<<<<<< HEAD
 
 # ✅ Document Processing
+=======
+>>>>>>> heroku/main
 pdfplumber
 pytesseract
 pillow
@@ -26,6 +38,7 @@ PyMuPDF
 python-docx
 python-pptx
 pandas
+<<<<<<< HEAD
 openpyxl
 
 # ✅ LangChain & OpenAI
@@ -54,3 +67,12 @@ rouge-score
 
 # ✅ Performance Optimization
 numexpr  # (For fast Pandas computations)
+=======
+langchain
+langchain-community
+langchain-pinecone
+openai
+langchain-openai
+pinecone-client
+rouge-score
+>>>>>>> heroku/main
