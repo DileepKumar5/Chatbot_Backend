@@ -17,37 +17,33 @@ def extract_text_from_image(image):
     return extracted_text.strip()
 
 def extract_pdf_content(pdf_path):
-    """
-    Extracts text, tables, and image-based text from a PDF without specifying Poppler.
-    """
     extracted_text = ""
     tables_data = []
-
+    
     with pdfplumber.open(pdf_path) as pdf:
         for page in pdf.pages:
-            extracted_text += page.extract_text() or ""
+            page_text = page.extract_text() or ""
+            extracted_text += page_text
+            print(f"🔍 Extracted Text from Page: {page_text[:500]}")  # ✅ Debugging text extraction
 
-            # ✅ Extract tables
+            # Extract tables
             tables = page.extract_tables()
             for table in tables:
                 if table:
                     formatted_table = "\n".join([" | ".join(filter(None, row)) for row in table if any(row)])
                     tables_data.append(formatted_table)
 
-    # ✅ Extract images and process OCR (Without specifying Poppler)
-    try:
-        pdf_images = pdf2image.convert_from_path(pdf_path)  # ❌ No poppler_path needed
-        image_text = ""
-        for image in pdf_images:
-            image_text += extract_text_from_image(image) + "\n"
-    except Exception as e:
-        image_text = f"Error extracting images: {str(e)}"
+    pdf_images = pdf2image.convert_from_path(pdf_path)
+    image_text = ""
+    for image in pdf_images:
+        image_text += extract_text_from_image(image) + "\n"
 
-    # ✅ Combine extracted content
-    full_extracted_content = (
+    full_content = (
         extracted_text +
-        "\n\n[TABLE DATA]\n" + "\n".join(tables_data) + 
+        "\n\n[TABLE DATA]\n" + "\n".join(tables_data) +
         "\n\n[IMAGE TEXT]\n" + image_text
     )
 
-    return full_extracted_content.strip()
+    print(f"🔍 Full Extracted Content: {full_content[:500]}")  # ✅ Debugging extracted text
+
+    return full_content.strip()

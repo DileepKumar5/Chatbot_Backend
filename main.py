@@ -38,10 +38,11 @@ class EvaluationRequest(BaseModel):
 async def fetch_drive_files(background_tasks: BackgroundTasks):
     """Fetches files from Google Drive and processes them asynchronously."""
     try:
+        logger.info("🔄 Starting Google Drive file processing in the background...")
         background_tasks.add_task(fetch_and_process_drive_files)
         return {"message": "Processing Google Drive files in the background"}
     except Exception as e:
-        logger.error(f"Error fetching drive files: {e}")
+        logger.error(f"❌ Error fetching drive files: {e}")
         raise HTTPException(status_code=500, detail="Failed to process Google Drive files")
 
 @app.post("/query/")
@@ -49,16 +50,19 @@ async def query_chatbot(query_request: QueryRequest):
     """Retrieves both the chatbot-generated answer and the reference answer from RAG system."""
     try:
         query = query_request.query
+        logger.info(f"🤖 Received query: {query}")
+
         result = retrieve_answer_and_reference(query)  # ✅ Ensure it returns a dictionary
 
         # ✅ Ensure correct response structure
         if isinstance(result, dict) and "response" in result:
             return result  # ✅ Return full response with context
         else:
+            logger.error("❌ Unexpected response format from RAG system.")
             return {"response": "Error: Unexpected response format."}
 
     except Exception as e:
-        logger.error(f"Error retrieving answer: {e}")
+        logger.error(f"❌ Error retrieving answer: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to retrieve response: {str(e)}")
 
 
@@ -83,6 +87,7 @@ if __name__ == "__main__":
     import uvicorn
 
     try:
+        logger.info("🚀 Starting FastAPI server on port 8000...")
         uvicorn.run(app, host="0.0.0.0", port=8000)
     except asyncio.CancelledError:
-        logger.warning("Server shutdown requested.")
+        logger.warning("⚠️ Server shutdown requested.")

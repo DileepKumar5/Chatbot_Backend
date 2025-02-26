@@ -23,6 +23,9 @@ os.environ["LANGSMITH_PROJECT"] = langsmith_project
 llm = ChatOpenAI(
     api_key=os.getenv("OPENAI_API_KEY"),
     model=os.getenv("OPENAI_MODEL"),
+    temperature=0.7,  # ✅ Set at initialization
+    top_p=0.95,
+    max_tokens=512  # ✅ Use `max_tokens` instead of `top_k`
 )
 
 # ✅ Get Pinecone Vector Store
@@ -52,65 +55,52 @@ def clean_and_humanize(text: str) -> str:
     """
 
     try:
-        ai_response = llm.invoke(prompt)
+        ai_response = llm.predict(prompt)  # ✅ FIXED: Use `.predict()` instead of `.invoke()`
+        return ai_response.strip()
 
-        # ✅ Ensure response format is valid
-        if isinstance(ai_response, str):
-            final_output = ai_response.strip()
-        elif hasattr(ai_response, "content") and isinstance(ai_response.content, str):
-            final_output = ai_response.content.strip()
-        else:
-            final_output = "Error: Unexpected response format."
-
-        return final_output
     except Exception as e:
         return f"Error processing response: {str(e)}"
 
 def retrieve_answer_and_reference(query: str):
-    """Retrieves the best response by merging results from Pinecone & LLM."""
+    """Retrieves the best response by first showing context, then generating an answer."""
     try:
-        retriever = vector_store.as_retriever()
-
-        # ✅ Retrieve relevant documents based on the query
-        retrieved_docs = retriever.invoke(query)
+        retriever = vector_store.as_retriever(search_kwargs={"k": 5})  # ✅ Retrieve top 5 results
+        retrieved_docs = retriever.get_relevant_documents(query)  # ✅ FIXED: Use `.get_relevant_documents(query)`
 
         if not retrieved_docs:
-            return {"response": "No relevant reference found."}
+            return {
+                "retrieved_context": "No relevant context found.",
+                "response": "I'm sorry, I couldn't find relevant information."
+            }
 
-        # ✅ Process the best match from retrieved documents
-        best_match = ""
-        for doc in retrieved_docs[:5]:
-            if hasattr(doc, "page_content") and any(word.lower() in doc.page_content.lower() for word in query.split()):
-                best_match = doc.page_content
-                break
+        # ✅ Extract retrieved contexts
+        contexts = [doc.page_content.strip() for doc in retrieved_docs if hasattr(doc, "page_content")]
+        formatted_context = "\n\n---\n\n".join(contexts) if contexts else "No relevant context found."
 
-        reference_answer = best_match if best_match else retrieved_docs[0].page_content
-
-        # ✅ Clean and format the reference content
-        refined_response = clean_and_humanize(reference_answer)
-
-        # ✅ Generate a chatbot response using OpenAI
+        # ✅ LLM Generation with Tuned Parameters
         prompt = f"""
-        Based on the following retrieved content, respond to the user's query:
-
-        **Context:**
-        "{refined_response}"
+        **Context from Database:**
+        {formatted_context}
 
         **User Query:**
-        "{query}"
+        {query}
+
+        **Instructions:**
+        - Answer the question accurately using the provided context.
+        - If uncertain, state that the information is unavailable.
+        - Avoid assumptions or fabricated responses.
         """
 
-        ai_response = llm.invoke(prompt)
+        ai_response = llm.predict(prompt)  # ✅ FIXED: Removed `top_k`
+        final_response = ai_response.strip()
 
-        # ✅ Ensure `ai_response` is correctly formatted
-        if isinstance(ai_response, str):
-            final_response = ai_response.strip()
-        elif hasattr(ai_response, "content") and isinstance(ai_response.content, str):
-            final_response = ai_response.content.strip()
-        else:
-            final_response = "Error: Unexpected response format."
-
-        return {"retrieved_context": refined_response, "response": final_response}
+        return {
+            "retrieved_context": formatted_context,
+            "response": final_response
+        }
 
     except Exception as e:
-        return {"retrieved_context": "Error retrieving context", "response": f"Error: {str(e)}"}
+        return {
+            "retrieved_context": "Error retrieving context",
+            "response": f"Error: {str(e)}"
+        }
