@@ -49,14 +49,18 @@ async def query_chatbot(query_request: QueryRequest):
     """Retrieves both the chatbot-generated answer and the reference answer from RAG system."""
     try:
         query = query_request.query
-        reference, chatbot_response = retrieve_answer_and_reference(query)  # ✅ Retrieves both answers
-        return {"response": chatbot_response}
-    except asyncio.CancelledError:
-        logger.warning("Request was cancelled.")
-        raise HTTPException(status_code=499, detail="Request was cancelled by client.")
+        result = retrieve_answer_and_reference(query)  # ✅ Ensure it returns a dictionary
+
+        # ✅ Ensure correct response structure
+        if isinstance(result, dict) and "response" in result:
+            return result  # ✅ Return full response with context
+        else:
+            return {"response": "Error: Unexpected response format."}
+
     except Exception as e:
         logger.error(f"Error retrieving answer: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve response")
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve response: {str(e)}")
+
 
 # @app.post("/evaluate-rag/")
 # async def evaluate_rag_response(evaluation_request: EvaluationRequest):

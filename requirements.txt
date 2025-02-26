@@ -1,14 +1,22 @@
+# ✅ FastAPI & Server
 fastapi
 uvicorn
 gunicorn
+
+# ✅ Environment & Request Handling
 pydantic
 requests
 python-dotenv
+asyncio
+
+# ✅ Google API (For Google Drive Integration)
 google-api-python-client
 google-auth
 google-auth-httplib2
 google-auth-oauthlib
 googleapis-common-protos
+
+# ✅ Document Processing
 pdfplumber
 pytesseract
 pillow
@@ -18,11 +26,31 @@ PyMuPDF
 python-docx
 python-pptx
 pandas
-langchain
-langchain-community
-langchain-pinecone
-openai
-langchain-openai
-pinecone-client
-rouge-score
 openpyxl
+
+# ✅ LangChain & OpenAI
+langchain-community  # (Avoid using 'langchain' monolithic package)
+langchain-pinecone
+langchain-openai
+openai
+tiktoken  # (For OpenAI Token Counting)
+
+# ✅ Pinecone Integration
+pinecone-client
+
+# ✅ LlamaIndex (New Modular Structure)
+llama-index-core
+llama-index-llms-openai
+llama-index-embeddings-openai
+llama-index-vector-stores-pinecone
+
+# ✅ NLP & Machine Learning
+scikit-learn  # (For text similarity search)
+nltk  # (For NLP preprocessing)
+spacy  # (For advanced text processing)
+
+# ✅ Text Evaluation
+rouge-score
+
+# ✅ Performance Optimization
+numexpr  # (For fast Pandas computations)
