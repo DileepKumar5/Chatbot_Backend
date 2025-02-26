@@ -57,8 +57,14 @@ def extract_text(file_path: str) -> str:
             text = "\n".join([p.text.strip() for p in doc.paragraphs if p.text.strip()])
 
         elif file_path.endswith(".xlsx"):
-            df = pd.read_excel(file_path, dtype=str)  # Convert all to string
-            text = df.to_string(index=False, header=True)
+            # Handling multiple sheets
+            df_dict = pd.read_excel(file_path, sheet_name=None, dtype=str)  # Read all sheets into a dictionary
+            text = ""
+            for sheet_name, sheet_df in df_dict.items():
+                text += f"\n\nSheet Name: {sheet_name}\n" + sheet_df.to_string(index=False, header=True)
+            if not text.strip():
+                logger.warning(f"⚠️ No text found in Excel file: {file_path}")
+                return None
 
         elif file_path.endswith(".pptx"):
             prs = Presentation(file_path)
