@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # ✅ FastAPI & Server
 fastapi
 uvicorn
@@ -11,42 +10,31 @@ python-dotenv
 asyncio
 
 # ✅ Google API (For Google Drive Integration)
-=======
-fastapi
-uvicorn
-gunicorn
-pydantic
-requests
-python-dotenv
->>>>>>> heroku/main
 google-api-python-client
 google-auth
 google-auth-httplib2
 google-auth-oauthlib
 googleapis-common-protos
-<<<<<<< HEAD
 
 # ✅ Document Processing
-=======
->>>>>>> heroku/main
 pdfplumber
 pytesseract
 pillow
 pdf2image
 opencv-python
-PyMuPDF
+pymupdf  # ✅ Corrected from "PyMuPDF"
 python-docx
 python-pptx
 pandas
-<<<<<<< HEAD
 openpyxl
 
 # ✅ LangChain & OpenAI
-langchain-community  # (Avoid using 'langchain' monolithic package)
+langchain
+langchain-community  # ✅ Keep only one of these
 langchain-pinecone
 langchain-openai
 openai
-tiktoken  # (For OpenAI Token Counting)
+tiktoken  # ✅ OpenAI Token Counting
 
 # ✅ Pinecone Integration
 pinecone-client
@@ -58,8 +46,8 @@ llama-index-embeddings-openai
 llama-index-vector-stores-pinecone
 
 # ✅ NLP & Machine Learning
-scikit-learn  # (For text similarity search)
-nltk  # (For NLP preprocessing)
+scikit-learn
+nltk
 spacy  # (For advanced text processing)
 
 # ✅ Text Evaluation
@@ -67,12 +55,3 @@ rouge-score
 
 # ✅ Performance Optimization
 numexpr  # (For fast Pandas computations)
-=======
-langchain
-langchain-community
-langchain-pinecone
-openai
-langchain-openai
-pinecone-client
-rouge-score
->>>>>>> heroku/main
