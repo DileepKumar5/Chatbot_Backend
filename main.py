@@ -38,18 +38,11 @@ class EvaluationRequest(BaseModel):
 async def fetch_drive_files(background_tasks: BackgroundTasks):
     """Fetches files from Google Drive and processes them asynchronously."""
     try:
-<<<<<<< HEAD
         logger.info("🔄 Starting Google Drive file processing in the background...")
         background_tasks.add_task(fetch_and_process_drive_files)
         return {"message": "Processing Google Drive files in the background"}
     except Exception as e:
         logger.error(f"❌ Error fetching drive files: {e}")
-=======
-        background_tasks.add_task(fetch_and_process_drive_files)
-        return {"message": "Processing Google Drive files in the background"}
-    except Exception as e:
-        logger.error(f"Error fetching drive files: {e}")
->>>>>>> heroku/main
         raise HTTPException(status_code=500, detail="Failed to process Google Drive files")
 
 @app.post("/query/")
@@ -57,7 +50,6 @@ async def query_chatbot(query_request: QueryRequest):
     """Retrieves both the chatbot-generated answer and the reference answer from RAG system."""
     try:
         query = query_request.query
-<<<<<<< HEAD
         logger.info(f"🤖 Received query: {query}")
 
         result = retrieve_answer_and_reference(query)  # ✅ Ensure it returns a dictionary
@@ -73,16 +65,6 @@ async def query_chatbot(query_request: QueryRequest):
         logger.error(f"❌ Error retrieving answer: {e}")
         raise HTTPException(status_code=500, detail=f"Failed to retrieve response: {str(e)}")
 
-=======
-        reference, chatbot_response = retrieve_answer_and_reference(query)  # ✅ Retrieves both answers
-        return {"response": chatbot_response}
-    except asyncio.CancelledError:
-        logger.warning("Request was cancelled.")
-        raise HTTPException(status_code=499, detail="Request was cancelled by client.")
-    except Exception as e:
-        logger.error(f"Error retrieving answer: {e}")
-        raise HTTPException(status_code=500, detail="Failed to retrieve response")
->>>>>>> heroku/main
 
 # @app.post("/evaluate-rag/")
 # async def evaluate_rag_response(evaluation_request: EvaluationRequest):
@@ -105,13 +87,7 @@ if __name__ == "__main__":
     import uvicorn
 
     try:
-<<<<<<< HEAD
         logger.info("🚀 Starting FastAPI server on port 8000...")
         uvicorn.run(app, host="0.0.0.0", port=8000)
     except asyncio.CancelledError:
         logger.warning("⚠️ Server shutdown requested.")
-=======
-        uvicorn.run(app, host="0.0.0.0", port=8000)
-    except asyncio.CancelledError:
-        logger.warning("Server shutdown requested.")
->>>>>>> heroku/main

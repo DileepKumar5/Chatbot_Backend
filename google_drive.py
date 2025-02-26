@@ -2,32 +2,17 @@ from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
 from google.oauth2 import service_account
 import os
-<<<<<<< HEAD
 import logging
 from dotenv import load_dotenv
 from embeddings import process_and_store_embeddings, document_exists_in_pinecone
-=======
-import io
-import logging
-from dotenv import load_dotenv
-from embeddings import process_and_store_embeddings, document_exists_in_pinecone
-import base64
-import json
-
->>>>>>> heroku/main
 
 # Load environment variables
 load_dotenv()
 
 # Load Google Drive API credentials
 SCOPES = ["https://www.googleapis.com/auth/drive"]
-<<<<<<< HEAD
 SERVICE_ACCOUNT_FILE = os.getenv("SERVICE_ACCOUNT_FILE", "service_account.json")
 # service_account_data = base64.b64decode(os.getenv("GOOGLE_SERVICE_ACCOUNT")).decode("utf-8")
-=======
-# SERVICE_ACCOUNT_FILE = os.getenv("SERVICE_ACCOUNT_FILE", "service_account.json")
-service_account_data = base64.b64decode(os.getenv("GOOGLE_SERVICE_ACCOUNT")).decode("utf-8")
->>>>>>> heroku/main
 
 FOLDER_ID = os.getenv("GOOGLE_DRIVE_FOLDER_ID")
 
@@ -35,23 +20,12 @@ FOLDER_ID = os.getenv("GOOGLE_DRIVE_FOLDER_ID")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-<<<<<<< HEAD
 # Authenticate with Google Drive
 try:
     creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
     # creds = service_account.Credentials.from_service_account_info(
     #     json.loads(service_account_data), scopes=SCOPES
     # )
-=======
-
-
-# Authenticate with Google Drive
-try:
-    # creds = service_account.Credentials.from_service_account_file(SERVICE_ACCOUNT_FILE, scopes=SCOPES)
-    creds = service_account.Credentials.from_service_account_info(
-        json.loads(service_account_data), scopes=SCOPES
-    )
->>>>>>> heroku/main
     drive_service = build("drive", "v3", credentials=creds)
     logger.info("✅ Successfully connected to Google Drive API")
 except Exception as e:
@@ -69,14 +43,11 @@ ALLOWED_MIME_TYPES = {
 def list_files():
     """Lists supported files in the specified Google Drive folder."""
     try:
-<<<<<<< HEAD
         if not FOLDER_ID:
             logger.error("❌ GOOGLE_DRIVE_FOLDER_ID is missing. Please check your .env file.")
             return []
 
         logger.info(f"📂 Checking files in Google Drive folder: {FOLDER_ID}")
-=======
->>>>>>> heroku/main
         query = f"'{FOLDER_ID}' in parents and trashed=false"
         results = drive_service.files().list(q=query, fields="files(id, name, mimeType)").execute()
         files = results.get("files", [])
@@ -92,7 +63,6 @@ def list_files():
         return []
 
 def download_file(file_id, file_name):
-<<<<<<< HEAD
     """Downloads a file from Google Drive only if embeddings don't exist in Pinecone."""
     try:
         exists = document_exists_in_pinecone(file_name)
@@ -102,16 +72,6 @@ def download_file(file_id, file_name):
             logger.info(f"⏭️ Skipping {file_name}, embeddings already exist")
             return None
 
-=======
-    """Downloads a file from Google Drive **only if embeddings don't exist in Pinecone**."""
-    
-    # ✅ First, check if the file's embeddings already exist in Pinecone
-    if document_exists_in_pinecone(file_name):
-        logger.info(f"⏭️ Skipping download of {file_name}, embeddings already exist in Pinecone")
-        return None  # ✅ Skip downloading
-
-    try:
->>>>>>> heroku/main
         request = drive_service.files().get_media(fileId=file_id)
         file_path = os.path.join("downloaded_docs", file_name)
 
@@ -123,30 +83,18 @@ def download_file(file_id, file_name):
             while not done:
                 status, done = downloader.next_chunk()
 
-<<<<<<< HEAD
         logger.info(f"⬇️ Successfully downloaded: {file_name}")
-=======
-        logger.info(f"⬇️ Downloaded: {file_name}")
->>>>>>> heroku/main
         return file_path
 
     except Exception as e:
         logger.error(f"❌ Failed to download {file_name}: {e}")
         return None
 
-<<<<<<< HEAD
 def fetch_and_process_drive_files():
     """Fetches all supported files from Google Drive and processes embeddings **only if they don't exist**."""
     logger.info("🔄 Fetching files from Google Drive...")
 
     files = list_files()
-=======
-
-def fetch_and_process_drive_files():
-    """Fetches all supported files from Google Drive and processes embeddings **only if they don't exist**."""
-    files = list_files()
-
->>>>>>> heroku/main
     if not files:
         logger.warning("⚠️ No files found to process")
         return {"message": "No files found"}
@@ -154,7 +102,6 @@ def fetch_and_process_drive_files():
     processed_files = 0
     for file in files:
         file_path = download_file(file["id"], file["name"])
-<<<<<<< HEAD
 
         if file_path:
             logger.info(f"🧠 Processing embeddings for {file['name']}...")
@@ -167,14 +114,3 @@ def fetch_and_process_drive_files():
 
     logger.info(f"✅ Processing completed. {processed_files} new files processed.")
     return {"message": f"{processed_files} files processed successfully"}
-=======
-        
-        # ✅ Only process if the file was actually downloaded (i.e., embeddings were missing)
-        if file_path:
-            process_and_store_embeddings(file_path, file["name"])
-            processed_files += 1
-
-    logger.info(f"✅ Processing completed. {processed_files} new files processed.")
-    return {"message": f"{processed_files} files processed successfully"}
-
->>>>>>> heroku/main
