@@ -40,6 +40,7 @@ tiktoken  # ✅ OpenAI Token Counting
 pinecone-client
 
 # ✅ LlamaIndex (New Modular Structure)
+llama-index
 llama-index-core
 llama-index-llms-openai
 llama-index-embeddings-openai
@@ -55,3 +56,6 @@ rouge-score
 
 # ✅ Performance Optimization
 numexpr  # (For fast Pandas computations)
+
+pytesseract
+pdf2image
